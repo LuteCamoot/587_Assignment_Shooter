@@ -27,7 +27,7 @@ class Menu extends Phaser.Scene {
     }
 
     create() {
-        let play_text = this.add.text(GAMEWIDTH / 2, GAMEHEIGHT /2, "PLAY",
+        let play_text = this.add.text(GAMEWIDTH * 0.5, GAMEHEIGHT * 0.5, "PLAY",
              {fontSize: "36px", color: "#000000"}).setOrigin(0.5,0.5);
         play_text.setInteractive();
         play_text.on("pointerdown", this.startGame, this);
@@ -79,10 +79,10 @@ class Game extends Phaser.Scene {
             repeat: 0
         })
         space_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        player_spr = new Player(this, 20, GAMEHEIGHT/2, "gun_spr");
-        target_array[0] = new Target(this, GAMEWIDTH - 200, GAMEHEIGHT/2, "target_spr");
-        target_array[1] = new Target(this, GAMEWIDTH - 100, GAMEHEIGHT/2 - 150, "target_spr");
-        target_array[2] = new Target(this, GAMEWIDTH - 100, GAMEHEIGHT/2 + 150, "target_spr");
+        player_spr = new Player(this, 0, GAMEHEIGHT * 0.5, "gun_spr");
+        target_array[0] = new Target(this, GAMEWIDTH * 0.79, GAMEHEIGHT * 0.5, "target_spr");
+        target_array[1] = new Target(this, GAMEWIDTH * 0.9, GAMEHEIGHT * 0.22, "target_spr");
+        target_array[2] = new Target(this, GAMEWIDTH * 0.9, GAMEHEIGHT * 0.78, "target_spr");
         cursors = this.input.keyboard.createCursorKeys();
         bullet_array = [];
         for (let id = 0; id < NUM_BULLETS; id++) {
@@ -90,7 +90,7 @@ class Game extends Phaser.Scene {
         }
 
         score = 0;
-        score_text = this.add.text(GAMEWIDTH/2, 20, "SCORE: 0", {fontSize : "32px", color: "#000000"});
+        score_text = this.add.text(GAMEWIDTH * 0.5, GAMEHEIGHT * 0.05, "SCORE: 0", {fontSize : "32px", color: "#000000"});
         score_text.setOrigin(0.5, 0);
     }
     update() {
@@ -163,6 +163,7 @@ const config = {
     height: GAMEHEIGHT,
     backgroundColor: "#86dbfd",
     pixelArt: true,
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH},
     scene: [Menu, Game]
 };
 
