@@ -8,10 +8,10 @@ class Player extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y, texture) {
         super(scene, x, y, texture, 0);   
         this.setOrigin(0, 0.5);           
-        this.setScale(2);     
+        this.setScale(1.5);     
         scene.add.existing(this);
         this.state = READY_STATE;
-    } // constructor()
+    } 
 
     getMuzzle(){
         let offset = new Phaser.Math.Vector2(MUZZLE_X * this.scaleX, MUZZLE_Y * this.scaleY);
@@ -20,12 +20,8 @@ class Player extends Phaser.GameObjects.Sprite {
     }
 
     updateGun(cursors) {
-        if (cursors.up.isDown) {
-            this.angle -= GUN_TURN_SPEED; 
-        }
-        if (cursors.down.isDown) {
-            this.angle += GUN_TURN_SPEED;
-        }
+        if (cursors.up.isDown || w_input.isDown ) { this.angle -= GUN_TURN_SPEED; }
+        if (cursors.down.isDown || s_input.isDown) { this.angle += GUN_TURN_SPEED; }
         this.angle = Phaser.Math.Clamp(this.angle, GUN_MIN_ANGLE, GUN_MAX_ANGLE);
     } 
 
