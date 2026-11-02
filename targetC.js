@@ -44,7 +44,7 @@ class Target extends Phaser.Physics.Arcade.Sprite {
 
     getHitScore(bullet_spr) {
         let yDiff = Math.abs(bullet_spr.y - this.y);
-        if (yDiff <= INNER_SIZE * this.scaleY) { return 300; }
+        if (yDiff <= INNER_SIZE * this.scaleY) { return 300 + getGunStats().bullseyeBonus; }
         else if (yDiff <= MIDDLE_SIZE * this.scaleY) { return 200;}
         else { return 100; }
     }

@@ -47,4 +47,8 @@ class Player extends Phaser.GameObjects.Sprite {
         this.setFrame(0);
         this.state = READY_STATE;
     }
+
+    recoil(recoil) {
+        this.angle = Phaser.Math.Clamp(this.angle - recoil, GUN_MIN_ANGLE, GUN_MAX_ANGLE);
+    }
 }

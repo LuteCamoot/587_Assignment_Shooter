@@ -1,5 +1,5 @@
 const BULLET_SPEED = 900;
-const MAX_BOUNCES = 20;
+const MAX_BOUNCES = 2;
 const BULLET_BODY_SIZE = 5;
 
 class Bullet extends Phaser.Physics.Arcade.Sprite {
@@ -20,10 +20,10 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     }
 
     fireBullet(xPos, yPos, rotation) {
-            this.enableBody(true, xPos, yPos, true, true);
-            this.rotation = rotation;
-            this.scene.physics.velocityFromRotation(rotation, BULLET_SPEED, this.body.velocity);
-            this.bouncesLeft = MAX_BOUNCES;
+        this.enableBody(true, xPos, yPos, true, true);
+        this.rotation = rotation;
+        this.scene.physics.velocityFromRotation(rotation, BULLET_SPEED, this.body.velocity);
+        this.bouncesLeft = getGunStats().bounces;
     }
 
     updateBullet() {
