@@ -38,14 +38,14 @@ class Game extends Phaser.Scene {
     constructor() { super("Game"); }
     preload() {
         this.load.spritesheet('gun_spr', 'assets/gunWIPSpritesheet.png', { frameWidth: 140, frameHeight: 60 });
-        this.load.spritesheet('target_spr', 'assets/WIPTargetSpritesheet.png', { frameWidth: 64, frameHeight: 64 });
+        this.load.spritesheet('target_spr', 'assets/WIPTargetSpritesheet.png', { frameWidth: 110, frameHeight: 64 });
         this.load.image('bullet_img', 'assets/BulletSpriteWIP.png');
     }
     create() {
         this.anims.create({ key: "gunCock", frames: this.anims.generateFrameNumbers("gun_spr", {start: 0, end: 2}), frameRate: 10, repeat: 0})
         this.anims.create({ key: "gunFire", frames: this.anims.generateFrameNumbers("gun_spr", {start: 2, end: 7 }), frameRate: 20, repeat: 0})
-        this.anims.create({ key: "targetDOWN", frames: this.anims.generateFrameNumbers("target_spr", {start:0, end: 4}), frameRate: 20, repeat: 0})
-        this.anims.create({ key: "targetUP", frames: this.anims.generateFrameNumbers("target_spr", {frames: [4, 3, 2, 1, 0] }), frameRate: 20, repeat: 0})
+        this.anims.create({ key: "targetDOWN", frames: this.anims.generateFrameNumbers("target_spr", {start:1, end: 4}), frameRate: 20, repeat: 0})
+        this.anims.create({ key: "targetUP", frames: this.anims.generateFrameNumbers("target_spr", {frames: [4, 3, 2, 1] }), frameRate: 20, repeat: 0})
 
         player_spr = new Player(this, 0, GAMEHEIGHT * 0.5, "gun_spr");
         target_array[0] = new Target(this, Math.round(GAMEWIDTH * 0.79), Math.round(GAMEHEIGHT * 0.5), "target_spr");
@@ -89,8 +89,9 @@ class Game extends Phaser.Scene {
 }
 
 function bulletHitTarget(bullet_spr, target_spr) {
+    let fromBehind = bullet_spr.x > target_spr.x;
     let points = target_spr.getHitScore(bullet_spr);
-    target_spr.targetHit();
+    target_spr.targetHit(fromBehind);
     score += points;
     score_text.setText("SCORE: " + score);
     bullet_spr.useBounce();
