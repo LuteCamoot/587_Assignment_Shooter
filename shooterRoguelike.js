@@ -28,7 +28,13 @@ let score = 0;
 let score_text;
 let ammo_text;
 
+let laser_length = 2000;
+let laser_fx;
 
+let shotPoints = 0;
+let scavengerUsed = false;
+
+let followUpShot = 0;
 
 class Menu extends Phaser.Scene {
     constructor() { super("Menu"); }
@@ -64,6 +70,8 @@ class Game extends Phaser.Scene {
 
         for (let id = 0; id < NUM_BULLET_SPRITES; id++) { bullet_array[id] = new Bullet(this, "bullet_img"); }
         ammo = getGunStats().ammo;
+
+        laser_fx = this.add.graphics();
         
         cursors = this.input.keyboard.createCursorKeys();
         w_input = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
@@ -77,21 +85,54 @@ class Game extends Phaser.Scene {
 
 
         this.physics.world.setBoundsCollision(false, true, true, true);
-        this.physics.world.on("worldbounds", (body) => { 
-            if (body.gameObject instanceof Bullet) { body.gameObject.useBounce(); }
-        });
-        this.physics.add.collider(bullet_array, target_array, bulletHitTarget);
+        this.physics.world.on("worldbounds", (body, up, down, left, right) =>
+             { let bullet_spr = body.gameObject;
+                if (!(bullet_spr instanceof Bullet)) {return;}
+                if (upgrades.polka && !bullet_spr.hasWarped) {
+                    bullet_spr.warp(up,down,right); }
+                    else { bullet_spr.useBounce(); bullet_spr.split(); }
+                });
+               
+        this.physics.add.collider(bullet_array, target_array, bulletHitTarget, bulletPierce);
     }
     update() {
         player_spr.updateGun(cursors);
         if (cursors.space.isDown) {
             if (player_spr.state === READY_STATE && !shotInProgress()) { player_spr.cockGun(); }
-            else if (player_spr.state === COCKED_STATE && ammo > 0) { if (shootBullet()) { player_spr.fireGun(); }}   
-        }
-        if (reset_input.isDown) {for(let t = 0; t < target_array.length; t++) { target_array[t].resetTarget(); } }
+            else if (player_spr.state === COCKED_STATE && ammo > 0) { 
+                if (upgrades.shotgun) {
+                    if (shootBullet()) { shotStarted(); } } 
+                else
+                    shotStarted(); 
+            }
+            }   
+        if (upgrades.laser) { drawLaser(); }
+        if (reset_input.isDown) {for(let t = 0; t < target_array.length; t++) { target_array[t].resetTarget(); }
+            ammo = 6;
+            ammo_text.setText("AMMO: " + ammo);}
         for (let id = 0; id < bullet_array.length; id++) { if (bullet_array[id].active) { bullet_array[id].updateBullet(); } }
     }
 }
+function bulletPierce(bullet_spr, target_spr) {
+    let sniper = upgrades.sniper && target_spr.isBullseye(bullet_spr);
+    if (!sniper) {
+        if (bullet_spr.piercesLeft <= 0) {return true;}
+        bullet_spr.piercesLeft--;
+    }
+        let fromBehind = bullet_spr.body.velocity.x < 0;
+        scoreCalculate(bullet_spr, target_spr, fromBehind);
+        bullet_spr.split();
+        return false;
+}
+
+function drawLaser(){
+    laser_fx.clear();
+    let muzzle = player_spr.getMuzzle();
+    let reach = new Phaser.Math.Vector2().setToPolar(player_spr.rotation, laser_length); //SET TO POLAR
+    laser_fx.lineStyle(2, 0xff0000, 0.5);
+    laser_fx.lineBetween(muzzle.x, muzzle.y, muzzle.x + reach.x, muzzle.y + reach.y);
+}
+
 function shootBullet() {
     let bullet_spr = Phaser.Actions.GetFirst(bullet_array, {active: false});
     if (!bullet_spr || ammo <= 0) {return false;}
@@ -106,14 +147,45 @@ function shootBullet() {
 
 function bulletHitTarget(bullet_spr, target_spr) {
     let fromBehind = bullet_spr.x > target_spr.x;
-    let points = target_spr.getHitScore(bullet_spr);
-    target_spr.targetHit(fromBehind);
-    score += points;
-    score_text.setText("SCORE: " + score);
+    scoreCalculate(bullet_spr,target_spr, fromBehind);
     bullet_spr.useBounce();
+    bullet_spr.split();
 }
 
-function shotInProgress() {return Phaser.Actions.GetFirst(bullet_array, {active: true}) !== null; }
+function scoreCalculate(bullet_spr, target_spr, fromBehind) {
+    let points = target_spr.getHitScore(bullet_spr);
+        target_spr.targetHit(fromBehind);
+        score += points;
+        shotPoints += points;
+        score_text.setText("SCORE: " + score);
+}
+
+function shotStarted() { 
+    shotPoints = 0;
+    shootAndAnimate();
+    for (let i = 1; i < getGunStats().bulletsPerShot; i++) {
+        followUpShot++;
+        player_spr.scene.time.delayedCall(120 * i, () => {
+            followUpShot--;
+            shootAndAnimate();
+            if (!shotInProgress()) {onShotEnded();}
+        });
+    }
+}
+
+function shootAndAnimate() {
+    if (shootBullet()) {player_spr.fireGun();}
+}
+
+function onShotEnded() {
+    if (upgrades.scavenger && !scavengerUsed && shotPoints <= 0) {
+        scavengerUsed = true;
+        ammo++
+        ammo_text.setText("AMMO: " + ammo);
+    }
+}
+
+function shotInProgress() {return followUpShot > 0 || Phaser.Actions.GetFirst(bullet_array, {active: true}) !== null; }
 
 const config = {
     type: Phaser.AUTO,

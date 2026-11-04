@@ -11,6 +11,8 @@ class Player extends Phaser.GameObjects.Sprite {
         this.setScale(1.5);     
         scene.add.existing(this);
         this.state = READY_STATE;
+        this.on("animationcomplete-gunCock", this.cockEnded, this);
+        this.on("animationcomplete-gunFire", this.fireEnded, this);
     } 
 
     getMuzzle(){
@@ -28,7 +30,6 @@ class Player extends Phaser.GameObjects.Sprite {
     cockGun() {
         this.state = COCKING_STATE;
         this.anims.play("gunCock");
-        this.once("animationcomplete", this.cockEnded, this);
     }
 
     cockEnded(){
@@ -40,7 +41,6 @@ class Player extends Phaser.GameObjects.Sprite {
         this.state = FIRING_STATE;
         this.anims.play("gunFire");
         console.log("Gun fired");
-        this.once("animationcomplete", this.fireEnded, this);
     }
 
     fireEnded() {

@@ -29,11 +29,7 @@ class Target extends Phaser.Physics.Arcade.Sprite {
         this.disableBody(false, false);
     }
 
-    resetTarget(){
-        if (this.state === DOWN_STATE) {
-            this.anims.play("targetUP");
-        }
-    }
+    resetTarget(){ if (this.state === DOWN_STATE) {this.anims.play("targetUP");}}
 
     resetEnded(){
         this.setFlipX(false);
@@ -42,9 +38,11 @@ class Target extends Phaser.Physics.Arcade.Sprite {
         this.enableBody();
     }
 
+    isBullseye(bullet_spr) { return Math.abs(bullet_spr.y - this.y) <= INNER_SIZE * this.scaleY; }
+
     getHitScore(bullet_spr) {
         let yDiff = Math.abs(bullet_spr.y - this.y);
-        if (yDiff <= INNER_SIZE * this.scaleY) { return 300 + getGunStats().bullseyeBonus; }
+        if (this.isBullseye(bullet_spr)) { return 300 + getGunStats().bullseyeBonus; }
         else if (yDiff <= MIDDLE_SIZE * this.scaleY) { return 200;}
         else { return 100; }
     }
